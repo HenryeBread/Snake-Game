@@ -9,6 +9,7 @@ SPACE_SIZE = 50
 BODY_PARTS = 2
 SNAKE_COLOR = "#00FF00"
 FOOD_COLOR = "#FF0000"
+BAD_FOOD_COLOR = "#5C4033"
 BACKGROUND_COLOR = "#FFFFFF"
 #Snake Class
 class Snake:
@@ -35,8 +36,18 @@ class Food:
 
         canvas.create_oval(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tag="food")
 
+class RottenFood:
+    def __init__(self):
+
+        x = random.randint(0, (GAME_WIDTH/SPACE_SIZE) - 1) * SPACE_SIZE
+        y = random.randint(0, (GAME_HEIGHT/SPACE_SIZE) - 1) * SPACE_SIZE
+
+        self.coordinates = [x, y]
+
+        canvas.create_oval(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=BAD_FOOD_COLOR, tag="rottenfood")
+
 #Snake Movement
-def next_turn(snake, food):
+def next_turn(snake, food, rottenfood):
     
     x, y = snake.coordinates[0]
 
@@ -64,6 +75,14 @@ def next_turn(snake, food):
         canvas.delete("food")
 
         food = Food()
+    elif x == rottenfood.coordinates[0] and y == rottenfood.coordinates[1]:
+        score -= 1
+
+        label.config(text="Score: {}".format(score))
+
+        canvas.delete("rottenfood")
+
+        rottenfood = RottenFood()
 
     else:
         del snake.coordinates[-1]
@@ -76,7 +95,7 @@ def next_turn(snake, food):
         game_over()
         
     else:
-        window.after(SNAKE_SPEED, next_turn, snake, food)
+        window.after(SNAKE_SPEED, next_turn, snake, food, rottenfood)
 
 def change_direction(updated__direction):
     global direction
@@ -147,6 +166,7 @@ window.bind('<Down>', lambda event: change_direction('down'))
 
 snake = Snake()
 food = Food()
-next_turn(snake, food)
+rottenfood = RottenFood()
+next_turn(snake, food, rottenfood)
 
 window.mainloop()
